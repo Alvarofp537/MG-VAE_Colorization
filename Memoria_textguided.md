@@ -70,6 +70,11 @@ Los resultados se presentan en forma de tríos de imágenes: (imagen en gris, pr
 
 Los resultados muestran que el modelo es capaz de producir una colorización muy buena por regiones salvo en algunos casos concetros donde confunde los pétalos con hojas. Suponemos que debido a que las descripciones textuales contienen detalles sobre colores y partes de la flor, se logra que el modelo aplique los colores en las zonas adecuadas gracias a que la información del texto complementa la estructura visual.
 
+![text-guided-1](images/text-guided-1.png)
+![text-guided-2](images/text-guided-2.png)
+![text-guided-3](images/text-guided-3.png)
+![text-guided-4](images/text-guided-4.png)
+
 ---
 
 ### Conclusiones
