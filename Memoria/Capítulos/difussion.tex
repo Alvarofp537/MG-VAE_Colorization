@@ -1,1 +1,60 @@
-\section{Colorización con modelos de difussion}
+\section{Colorización con modelos de difusión}
+
+Los modelos de difusión se han consolidado como una de las técnicas más potentes en generación de imágenes. Su principio básico consiste en transformar ruido gaussiano en datos estructurados mediante un proceso iterativo de denoising. Formalmente, el proceso directo añade ruido a una imagen $x_0$ siguiendo una cadena de Markov:
+
+
+
+\[
+q(x_t \mid x_{t-1}) = \mathcal{N}(x_t; \sqrt{1-\beta_t} \, x_{t-1}, \beta_t I),
+\]
+
+
+
+donde $\beta_t$ controla la cantidad de ruido en el paso $t$. El modelo aprende la distribución inversa $p_\theta(x_{t-1} \mid x_t)$ para recuperar la señal original. Tras suficientes iteraciones, se obtiene una imagen coherente a partir de ruido inicial. Estos métodos han demostrado gran capacidad en tareas de síntesis y edición de imágenes \cite{Zabari2023Diffusing}.
+
+En el contexto de la colorización, los modelos de difusión resultan especialmente útiles porque permiten generar detalles cromáticos plausibles a partir de información parcial (imágenes en escala de grises). Gracias a su naturaleza probabilística, pueden explorar múltiples soluciones posibles y producir colores coherentes con la semántica de la escena, evitando la sobre–determinación que presentan otros enfoques más deterministas. Además, su capacidad para preservar estructuras espaciales durante el proceso de denoising favorece la reconstrucción de bordes y texturas, aspectos críticos en la colorización de imágenes.
+
+\subsection{Metodología}
+
+En nuestro trabajo hemos empleado el \textit{VAE} de \textit{Stable Diffusion 1.5} como codificador–decodificador base, y hemos explorado distintas variantes de la arquitectura \texttt{UNet} para la tarea de colorización:
+
+\begin{itemize}
+    \item Entrenamiento de un \texttt{UNet} desde cero.
+    \item \textit{Fine-tuning} del \texttt{UNet} original de \textit{Stable Diffusion}, restringido únicamente al último bloque de la red.
+    \item Adaptación mediante \texttt{LoRA} sobre el \texttt{UNet} de \textit{Stable Diffusion}.
+\end{itemize}
+
+El entrenamiento se ha realizado con un conjunto de aproximadamente 25\,000 imágenes del dataset \texttt{STL-10}. Al tratarse de imágenes de baja resolución (96$\times$96 píxeles), esto implica que los modelos pueden aprender representaciones limitadas en detalle fino, lo que afecta a la nitidez y a la fidelidad cromática de los resultados. 
+
+El proceso de entrenamiento resulta computacionalmente costoso y lento. Para optimizarlo, se calcularon previamente las representaciones latentes mediante el \textit{VAE}, de modo que el entrenamiento se realiza directamente sobre dichas latentes en lugar de sobre las imágenes originales. Esta estrategia reduce significativamente el tiempo de cómputo y permite focalizar el aprendizaje en la parte generativa del modelo.
+
+El objetivo principal es evaluar la capacidad de cada configuración para reconstruir color de manera fiel en imágenes en escala de grises, manteniendo la coherencia semántica y la nitidez de los detalles.
+
+\subsection{Resultados preliminares}
+
+Algunas observaciones relevantes derivadas de los experimentos iniciales son las siguientes:
+
+\begin{itemize}
+    \item El modelo tiende a difuminar el texto presente en las imágenes, lo que limita su aplicabilidad en escenarios donde la preservación de caracteres es crítica.
+    \item El rendimiento global no alcanza niveles excelentes, aunque se observan diferencias entre las variantes de \texttt{UNet}.
+    \item El número de pasos de difusión no resulta un factor determinante en la calidad final de la colorización.
+    \item Las imágenes generadas presentan en ocasiones un aspecto grisáceo o, alternativamente, fogonazos de color poco coherentes con la semántica de la escena.
+\end{itemize}
+
+Para la evaluación cuantitativa se emplearán las métricas \texttt{LPIPS} y \texttt{MSE}, aunque los valores aún no han sido calculados. Estas métricas permitirán contrastar de forma objetiva las diferencias perceptuales y de error cuadrático medio entre las variantes analizadas.
+
+\begin{table}[h]
+\centering
+\caption{Resultados cuantitativos preliminares de colorización (valores pendientes de cálculo).}
+\label{tab:colorizacion}
+\begin{tabular}{lcc}
+\hline
+\textbf{Modelo} & \textbf{LPIPS} & \textbf{MSE} \\
+\hline
+UNet desde cero & -- & -- \\
+Fine-tuning último bloque & -- & -- \\
+LoRA sobre Stable Diffusion & -- & -- \\
+\hline
+\end{tabular}
+\end{table}
+
